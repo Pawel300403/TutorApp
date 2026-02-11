@@ -10,9 +10,15 @@ class SameWeek(Lookup):
         lhs, lhs_params = self.process_lhs(compiler, connection)
         rhs, rhs_params = self.process_rhs(compiler, connection)
 
-        # dla SQLite i większości baz używamy funkcji strftime('%W', date)
-        sql = f"strftime('%%Y-%%W', {lhs}) = strftime('%%Y-%%W', {rhs})"
-        params = lhs_params + rhs_params
+        if connection.vendor == "postgresql":
+            sql = (
+                f"date_trunc('week', {lhs}) = date_trunc('week', {rhs})"
+            )
+            params = lhs_params + rhs_params
+        else:
+            sql = f"strftime('%%Y-%%W', {lhs}) = strftime('%%Y-%%W', {rhs})"
+            params = lhs_params + rhs_params
+
         return sql, params
 
 
@@ -24,7 +30,14 @@ class SameMonth(Lookup):
         lhs, lhs_params = self.process_lhs(compiler, connection)
         rhs, rhs_params = self.process_rhs(compiler, connection)
 
-        # porównanie roku i miesiąca
-        sql = f"strftime('%%Y-%%m', {lhs}) = strftime('%%Y-%%m', {rhs})"
-        params = lhs_params + rhs_params
+        if connection.vendor == "postgresql":
+            sql = (
+                f"EXTRACT(YEAR FROM {lhs}) = EXTRACT(YEAR FROM {rhs}) "
+                f"AND EXTRACT(MONTH FROM {lhs}) = EXTRACT(MONTH FROM {rhs})"
+            )
+            params = lhs_params + rhs_params + rhs_params
+        else:
+            sql = f"strftime('%%Y-%%m', {lhs}) = strftime('%%Y-%%m', {rhs})"
+            params = lhs_params + rhs_params
+
         return sql, params
