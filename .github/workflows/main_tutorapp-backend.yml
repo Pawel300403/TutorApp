@@ -40,7 +40,7 @@ jobs:
         with:
           name: python-app
           path: |
-            cd TutorAppBackend
+            TutorAppBackend
             !antenv/
 
       # 🚫 Opting Out of Oryx Build
