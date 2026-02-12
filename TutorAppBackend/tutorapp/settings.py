@@ -140,21 +140,30 @@ WSGI_APPLICATION = 'tutorapp.wsgi.application'
 #     }
 # }
 
-CON = os.environ.get("AZURE_POSTGRESQL_CONNECTIONSTRING")
-CON_STR = {}
-if CON:
-    CON_STR = { c.split("=")[0]:c.split("=")[1] for c in CON.split(";") }
+CON = os.environ.get("AZURE_POSTGRESQL_CONNECTIONSTRING", "")
+
+CON_STR = dict(item.split("=", 1) for item in CON.split(";") if "=" in item)
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME") or CON_STR["Database"],
-        "USER": os.environ.get("DB_USER") or CON_STR["User Id"],
-        "PASSWORD": os.environ.get("DB_PASSWORD") or CON_STR["Password"],
-        "HOST": os.environ.get("DB_HOST") or CON_STR["Server"],
-        "PORT": os.environ.get("DB_PORT", 5432),
+        "NAME": os.environ.get("DB_NAME") or CON_STR.get("Database"),
+        "USER": os.environ.get("DB_USER") or CON_STR.get("User Id"),
+        "PASSWORD": os.environ.get("DB_PASSWORD") or CON_STR.get("Password"),
+        "HOST": os.environ.get("DB_HOST") or CON_STR.get("Server"),
+        "PORT": os.environ.get("DB_PORT") or "5432",
     }
 }
+
+# jeśli dalej czegoś brakuje – fail z czytelnym błędem (zamiast KeyError)
+if not DATABASES["default"]["NAME"]:
+    raise RuntimeError("Brak DB_NAME / Database w connection string.")
+if not DATABASES["default"]["HOST"]:
+    raise RuntimeError("Brak DB_HOST / Server w connection string.")
+if not DATABASES["default"]["USER"]:
+    raise RuntimeError("Brak DB_USER / User Id w connection string.")
+if not DATABASES["default"]["PASSWORD"]:
+    raise RuntimeError("Brak DB_PASSWORD / Password w connection string.")
 
 
 # Password validation
