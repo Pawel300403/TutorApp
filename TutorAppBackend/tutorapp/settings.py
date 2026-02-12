@@ -140,14 +140,19 @@ WSGI_APPLICATION = 'tutorapp.wsgi.application'
 #     }
 # }
 
+CON = os.environ.get("AZURE_POSTGRESQL_CONNECTIONSTRING")
+CON_STR = {}
+if CON:
+    CON_STR = { c.split("=")[0]:c.split("=")[1] for c in CON.split(";") }
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
-        "HOST": os.environ.get("DB_HOST"),
-        "PORT": os.environ.get("DB_PORT"),
+        "NAME": os.environ.get("DB_NAME") or CON_STR["Database"],
+        "USER": os.environ.get("DB_USER") or CON_STR["User Id"],
+        "PASSWORD": os.environ.get("DB_PASSWORD") or CON_STR["Password"],
+        "HOST": os.environ.get("DB_HOST") or CON_STR["Server"],
+        "PORT": os.environ.get("DB_PORT", 5432),
     }
 }
 
