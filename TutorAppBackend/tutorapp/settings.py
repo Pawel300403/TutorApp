@@ -63,6 +63,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -155,16 +156,6 @@ DATABASES = {
     }
 }
 
-# jeśli dalej czegoś brakuje – fail z czytelnym błędem (zamiast KeyError)
-if not DATABASES["default"]["NAME"]:
-    raise RuntimeError("Brak DB_NAME / Database w connection string.")
-if not DATABASES["default"]["HOST"]:
-    raise RuntimeError("Brak DB_HOST / Server w connection string.")
-if not DATABASES["default"]["USER"]:
-    raise RuntimeError("Brak DB_USER / User Id w connection string.")
-if not DATABASES["default"]["PASSWORD"]:
-    raise RuntimeError("Brak DB_PASSWORD / Password w connection string.")
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -200,6 +191,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = 'static/'
 
 # Default primary key field type
